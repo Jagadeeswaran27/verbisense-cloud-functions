@@ -18,10 +18,11 @@ export const createUser = onCall(async (request) => {
       password: password,
     });
 
-    const userData = {
+    const userData: User = {
       uid: userRecord.uid,
       email: email,
       name: name,
+      photoURL: null,
     };
 
     await admin

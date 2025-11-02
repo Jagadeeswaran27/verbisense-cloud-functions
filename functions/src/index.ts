@@ -61,14 +61,12 @@ export const dailyNotificationScheduler = onSchedule(
 
       const userSnapshot = await admin.firestore().collection("users").get();
 
-      const tokens: string[] = userSnapshot.docs.flatMap((doc) => {
-        const data = doc.data();
-        const fcmTokens = data?.fcmToken as string[];
-        if (Array.isArray(fcmTokens)) {
-          return fcmTokens;
-        }
-        return [];
-      });
+      const tokens: string[] = userSnapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          return data.fcmToken;
+        })
+        .filter((token) => typeof token === "string");
 
       logger.info("FCM tokens collected:", tokens.length);
 

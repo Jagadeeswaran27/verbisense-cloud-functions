@@ -68,9 +68,11 @@ export const dailyNotificationScheduler = onSchedule(
         })
         .filter((token) => typeof token === "string");
 
-      logger.info("FCM tokens collected:", tokens.length);
+      const uniqueTokens = Array.from(new Set(tokens));
 
-      if (tokens.length === 0) {
+      logger.info("FCM tokens collected:", uniqueTokens.length);
+
+      if (uniqueTokens.length === 0) {
         logger.info("No FCM tokens found. Skipping notification send.");
         return;
       }
@@ -84,7 +86,7 @@ export const dailyNotificationScheduler = onSchedule(
           type: "daily_reminder",
           timestamp: new Date().toISOString(),
         },
-        tokens: tokens,
+        tokens: uniqueTokens,
       };
 
       const response = await admin.messaging().sendEachForMulticast(message);
@@ -100,8 +102,11 @@ export const dailyNotificationScheduler = onSchedule(
         const failedTokens: string[] = [];
         response.responses.forEach((resp, idx) => {
           if (!resp.success) {
-            failedTokens.push(tokens[idx]);
-            logger.error(`Failed to send to token ${tokens[idx]}:`, resp.error);
+            failedTokens.push(uniqueTokens[idx]);
+            logger.error(
+              `Failed to send to token ${uniqueTokens[idx]}:`,
+              resp.error
+            );
           }
         });
 
